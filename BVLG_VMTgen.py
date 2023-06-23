@@ -43,11 +43,11 @@ class VLG_VMT :
         
         self.selfillum = None
     
-    def find(mat, auto = 0) :
-        if not(mat.use_nodes) :
-            print(mat.name + " SKIPPED : Not Nodes")
+    def find(self, auto = 0):
+        if not self.use_nodes:
+            print(f"{self.name} SKIPPED : Not Nodes")
             return None
-        nodes = mat.node_tree.nodes
+        nodes = self.node_tree.nodes
         material_output = None
         for node in nodes:
             if (node.type == "OUTPUT_MATERIAL") and (node.is_active_output):
@@ -57,66 +57,66 @@ class VLG_VMT :
         while (node) and ((node.__class__.__name__ != "ShaderNodeGroup") or (node.node_tree.name != "VertexLitGeneric")) :
             print (node)
             node = node_CrawlUp(node)
-        if not (node) :
-            if (auto) :
-                print(mat.name + " SKIPPED : No BVLG found in NodeTree")
+        if not (node):
+            if auto:
+                print(f"{self.name} SKIPPED : No BVLG found in NodeTree")
             else:
                 print("ERROR : No BVLG found in NodeTree")
             return None
         return node
     
-    def load(self, BVLG, cdmaterials = "") :  
+    def load(self, BVLG, cdmaterials = ""):  
         self.basetexture = node_GetImg(node_CrawlUp(BVLG, basetexture))
-        if (self.basetexture) :
-            self.basetexture = '    $basetexture "' + cdmaterials + self.basetexture + '"'
+        if self.basetexture:
+            self.basetexture = f'    $basetexture "{cdmaterials}{self.basetexture}"'
         self.color2 = node_GetField(BVLG.inputs[color2])
-        if (self.color2) :
-            self.color2 = '    $color2 ' + self.color2
-        
+        if self.color2:
+            self.color2 = f'    $color2 {self.color2}'
+
         self.envmap = node_GetField(BVLG.inputs[envmap])
-        if (self.envmap != 0) :
+        if (self.envmap != 0):
             self.envmap = '    $envmap env_cubemap'
             self.envmaptint = node_GetField(BVLG.inputs[envmaptint])
-            if (self.envmaptint) :
-                self.envmaptint = '    $envmaptint ' + self.envmaptint
+            if self.envmaptint:
+                self.envmaptint = f'    $envmaptint {self.envmaptint}'
             self.envmapfresnel = node_GetField(BVLG.inputs[envmapfresnel])
-            if (self.envmapfresnel) :
-                self.envmapfresnel = '    $envmapfresnel ' + format(self.envmapfresnel, FMT)
+            if self.envmapfresnel:
+                self.envmapfresnel = f'    $envmapfresnel {format(self.envmapfresnel, FMT)}'
 
         self.phong = node_GetField(BVLG.inputs[phong])
-        if (self.phong != 0) :
+        if (self.phong != 0):
             self.phong = '    $phong 1'
             self.phongboost = node_GetField(BVLG.inputs[phongboost])
-            self.phongboost = '    $phongboost ' + format(self.phongboost,  FMT)
+            self.phongboost = f'    $phongboost {format(self.phongboost, FMT)}'
             self.phongexponent = node_CrawlUp(BVLG, phongexponent)
-            if (self.phongexponent) and (self.phongexponent.__class__.__name__ == "ShaderNodeGroup") and (self.phongexponent.node_tree.name == "$phongexponenttexture splitter") :
-                self.phongexponent = '    $phongexponenttexture "' + cdmaterials + str(node_GetImg(node_CrawlUp(self.phongexponent, 0))) + '"'
+            if (self.phongexponent) and (self.phongexponent.__class__.__name__ == "ShaderNodeGroup") and (self.phongexponent.node_tree.name == "$phongexponenttexture splitter"):
+                self.phongexponent = f'    $phongexponenttexture "{cdmaterials}{str(node_GetImg(node_CrawlUp(self.phongexponent, 0)))}"'
                 self.phongtint = node_CrawlUp(BVLG, phongtint)
                 if (self.phongtint) and (self.phongtint.__class__.__name__ == "ShaderNodeGroup") and (self.phongtint.node_tree.name == "$phongalbedotint") :
                     self.phongtint = '    $phongalbedotint 1'
-            else :
+            else:
                 self.phongexponent = node_GetField(BVLG.inputs[phongexponent])
-                self.phongexponent = '    $phongexponent ' + format(self.phongexponent, FMT)
+                self.phongexponent = f'    $phongexponent {format(self.phongexponent, FMT)}'
             self.phongfresnelranges = node_GetField(BVLG.inputs[phongfresnelranges])
-            if (self.phongfresnelranges) :
-                self.phongfresnelranges = '    $phongfresnelranges ' + self.phongfresnelranges
-            if not(self.phongtint) :
+            if self.phongfresnelranges:
+                self.phongfresnelranges = f'    $phongfresnelranges {self.phongfresnelranges}'
+            if not(self.phongtint):
                 self.phongtint = node_GetField(BVLG.inputs[phongtint])
-                if (self.phongtint) :
-                    self.phongtint = '    $phongtint ' + self.phongtint
+                if self.phongtint:
+                    self.phongtint = f'    $phongtint {self.phongtint}'
             self.rimlight = node_GetField(BVLG.inputs[rimlight])
-            if (self.rimlight != 0) :
+            if (self.rimlight != 0):
                 self.rimlight = '    $rimlight 1'
                 self.rimlightboost = node_GetField(BVLG.inputs[rimlightboost])
-                self.rimlightboost = '    $rimlightboost ' + format(self.rimlightboost, FMT)
-            
+                self.rimlightboost = f'    $rimlightboost {format(self.rimlightboost, FMT)}'
+
             self.selfillum = node_GetField(BVLG.inputs[selfillum])
             if (self.selfillum != 0) :
                 self.selfillum = '    $selfillum 1'
 
         self.bumpmap = node_GetImg(node_CrawlUp(BVLG, bumpmap))
-        if (self.bumpmap) :
-            self.bumpmap = '    $bumpmap "'+ cdmaterials + self.bumpmap + '"'
+        if self.bumpmap:
+            self.bumpmap = f'    $bumpmap "{cdmaterials}{self.bumpmap}"'
         elif (self.phong) :
             self.bumpmap = '    $bumpmap "dev/bump_normal"'
 
@@ -162,15 +162,21 @@ def node_GetImg(node) :
     name = re.sub('\....$', '', node.image.name)
     return name
 
-def node_GetField(socket) :
-    if (socket.__class__.__name__ == "NodeSocketColor") :
-        if (socket.default_value[0] == 1 and socket.default_value[1] == 1 and socket.default_value[2] == 1) :
-            return None
-        return ('"[ ' + format(socket.default_value[0], FMT) + " " + format(socket.default_value[1], FMT) + " " + format(socket.default_value[2], FMT) + ' ]"')
-    elif (socket.__class__.__name__ == "NodeSocketVector") :
-        return ('"[ ' + format(socket.default_value[0], FMT) + " " + format(socket.default_value[1], FMT) + " " + format(socket.default_value[2], FMT) + ' ]"')
-    elif (socket.__class__.__name__ == "NodeSocketFloat") :
+def node_GetField(socket):
+    if socket.__class__.__name__ == "NodeSocketColor":
+        return (
+            None
+            if (
+                socket.default_value[0] == 1
+                and socket.default_value[1] == 1
+                and socket.default_value[2] == 1
+            )
+            else f'"[ {format(socket.default_value[0], FMT)} {format(socket.default_value[1], FMT)} {format(socket.default_value[2], FMT)} ]"'
+        )
+    elif socket.__class__.__name__ == "NodeSocketFloat":
         return socket.default_value
+    elif socket.__class__.__name__ == "NodeSocketVector":
+        return f'"[ {format(socket.default_value[0], FMT)} {format(socket.default_value[1], FMT)} {format(socket.default_value[2], FMT)} ]"'
     return None
 
 def node_CrawlUp(node_start, index = 0) :
@@ -186,7 +192,7 @@ def node_CrawlUp(node_start, index = 0) :
         return (node_CrawlUp(socket.node, 0))
     return socket.node
 
-def VMTgen(mat, cdmaterials, folder = "export", mode = "name") :
+def VMTgen(mat, cdmaterials, folder = "export", mode = "name"):
     if (mode == "name") :
         mat = bpy.data.materials[mat]
     elif (mode != "data") :
@@ -194,24 +200,22 @@ def VMTgen(mat, cdmaterials, folder = "export", mode = "name") :
         return
     if (cdmaterials[-1] != '/') :
         cdmaterials += '/'
-    node = VLG_VMT.find(mat, mode == "data")
-    if (node) :
-        
+    if node := VLG_VMT.find(mat, mode == "data"):
         BVLG = node
-        print(node)
+        print(BVLG)
         VMT = VLG_VMT()
         VMT.load(BVLG, cdmaterials)
-        
-        path = os.path.join(bpy.path.abspath("//"), folder) 
+
+        path = os.path.join(bpy.path.abspath("//"), folder)
         if not(os.path.exists(path)) :
             os.makedirs(path)
-        path += "/" + mat.name + ".vmt"
+        path += f"/{mat.name}.vmt"
         print(path)
-        print(mat.name + ".vmt")
-        
+        print(f"{mat.name}.vmt")
+
         file = open(path, "a+")
         file.truncate(0)
-        
+
         VMT.write(file)
         file.seek(0)
         print("\ngenerated output:")
